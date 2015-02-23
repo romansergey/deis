@@ -151,6 +151,7 @@ if [[ ! -z $EXTERNAL_PORT ]]; then
         # only retain the latest BACKUPS_TO_RETAIN backups
         sudo -u postgres envdir /etc/wal-e.d/env wal-e delete --confirm retain ${BACKUPS_TO_RETAIN}
         count=0
+        echo "database: backup has been completed."
       fi
     fi
     ((count++))

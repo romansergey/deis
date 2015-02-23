@@ -54,7 +54,14 @@ func TryTableSelect(t *testing.T, db *sql.DB, tableName string, expectFailure bo
 	}        
 }
 
-func TestDatabaseRestart(t *testing.T) {
+func execSql(t *testing.T, db *sql.DB, q string) {
+	_, err := db.Query(q)
+	if err, ok := err.(*pq.Error); ok {
+	    t.Fatal(err)
+	}
+}
+
+func TestDatabaseRecovery(t *testing.T) {
 	var err error
 	tag, etcdPort := utils.BuildTag(), utils.RandomPort()
 	cli, stdout, _ := dockercli.NewClient()
@@ -142,16 +149,12 @@ func TestDatabaseRestart(t *testing.T) {
 	TryTableSelect(t, db, "api_foo", true)
 
         fmt.Println("--- Creating the table") 	
-	_, err = db.Query("create table api_foo(t text)")
-	if err, ok := err.(*pq.Error); ok {
-	    t.Fatal(err)
-	}
+	execSql(t, db, "create table api_foo(t text)")
 
-	//STEP 2b: wait for backup
-	//FIXME: we need a marker for finished backup to simplify this
+	//STEP 2b: make sure we observed full backup cycle after forced checkpoint
         fmt.Print("--- Waiting for the change to be backed up... ")
-	dockercli.WaitForLine(t, stdout, "wal_e.worker.upload", false)
-	dockercli.WaitForLine(t, stdout, "database: performing a backup...", false)
+	dockercli.WaitForLine(t, stdout, "database: performing a backup...", true)
+	dockercli.WaitForLine(t, stdout, "database: backup has been completed.", true)
         fmt.Println("Done")
 
 	stopDatabase()
