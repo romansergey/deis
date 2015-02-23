@@ -4,13 +4,10 @@ import (
 	"fmt"
 	"testing"
 	"time"
-	//"os"
 	"github.com/deis/deis/tests/dockercli"
-	//"github.com/deis/deis/tests/etcdutils"
 	"github.com/deis/deis/tests/mock"
 	"github.com/deis/deis/tests/utils"
         "database/sql"
-
         "github.com/lib/pq"
 )
 
