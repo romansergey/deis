@@ -153,8 +153,8 @@ func TestDatabaseRecovery(t *testing.T) {
 
 	//STEP 2b: make sure we observed full backup cycle after forced checkpoint
         fmt.Print("--- Waiting for the change to be backed up... ")
-	dockercli.WaitForLine(t, stdout, "database: performing a backup...", true)
-	dockercli.WaitForLine(t, stdout, "database: backup has been completed.", true)
+	dockercli.WaitForLine(t, stdout, "database: performing a backup...", false)
+	dockercli.WaitForLine(t, stdout, "database: backup has been completed.", false)
         fmt.Println("Done")
 
 	stopDatabase()
