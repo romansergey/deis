@@ -53,7 +53,7 @@ func TryTableSelect(t *testing.T, db *sql.DB, tableName string, expectFailure bo
 
 func execSql(t *testing.T, db *sql.DB, q string) {
 	_, err := db.Query(q)
-	if err, ok := err.(*pq.Error); ok {
+	if err != nil {
 	    t.Fatal(err)
 	}
 }
@@ -126,7 +126,7 @@ func TestDatabaseRecovery(t *testing.T) {
 	//STEP 1: start db with volume A and wait for init to complete
         fmt.Print("--- Starting database with Volume A... ")
 	go startDatabase(databaseVolumeA)
-	dockercli.WaitForLine(t, stdout, "database: postgres is running...", false)
+	dockercli.WaitForLine(t, stdout, "database: postgres is running...", true)
         fmt.Println("Done")
 
 	db := OpenDeisDatabase(t, host, port)
@@ -138,7 +138,7 @@ func TestDatabaseRecovery(t *testing.T) {
 	cli, stdout, _ = dockercli.NewClient()
         fmt.Printf("--- Starting database with Volume B... ")
 	go startDatabase(databaseVolumeB)
-	dockercli.WaitForLine(t, stdout, "database: postgres is running...", false)
+	dockercli.WaitForLine(t, stdout, "database: postgres is running...", true)
         fmt.Println("Done")
 
 	
@@ -150,8 +150,8 @@ func TestDatabaseRecovery(t *testing.T) {
 
 	//STEP 2b: make sure we observed full backup cycle after forced checkpoint
         fmt.Print("--- Waiting for the change to be backed up... ")
-	dockercli.WaitForLine(t, stdout, "database: performing a backup...", false)
-	dockercli.WaitForLine(t, stdout, "database: backup has been completed.", false)
+	dockercli.WaitForLine(t, stdout, "database: performing a backup...", true)
+	dockercli.WaitForLine(t, stdout, "database: backup has been completed.", true)
         fmt.Println("Done")
 
 	stopDatabase()
@@ -160,7 +160,7 @@ func TestDatabaseRecovery(t *testing.T) {
 	cli, stdout, _ = dockercli.NewClient()
         fmt.Printf("--- Starting database with Volume A again... ")
 	go startDatabase(databaseVolumeA)
-	dockercli.WaitForLine(t, stdout, "database: postgres is running...", false)
+	dockercli.WaitForLine(t, stdout, "database: postgres is running...", true)
         fmt.Println("Done")
 
 	db = OpenDeisDatabase(t, host, port)
