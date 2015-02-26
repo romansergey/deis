@@ -10,6 +10,8 @@ GO_PACKAGES = dockercli etcdutils mock utils
 GO_PACKAGES_REPO_PATH = $(addprefix $(repo_path)/,$(GO_PACKAGES))
 
 MOCK_STORE_IMAGE = $(IMAGE_PREFIX)mock-store:latest
+MOCK_STORE_SRC=fixtures/mock-store
+MOCK_STORE_GIT_SHA = $(shell git log -n 1 --format="%h" -- $(MOCK_STORE_SRC))
 
 test: test-smoke
 
@@ -36,7 +38,10 @@ setup-gotools:
 	go get -v github.com/golang/lint/golint
 
 mock-store:
-	docker build -t $(MOCK_STORE_IMAGE) fixtures/mock-store/
+	cat $(MOCK_STORE_SRC)/Dockerfile | \
+	  GIT_SHA=$(MOCK_STORE_GIT_SHA) envsubst | \
+	  ./utils/dockerfeed -d - $(MOCK_STORE_SRC) | \
+	  docker build -t $(MOCK_STORE_IMAGE) -
 
 test-style:
 # display output, then check
